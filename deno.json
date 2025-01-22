@@ -3,6 +3,7 @@
     "dev": "deno run --watch index.js"
   },
   "imports": {
-    "discord.js": "npm:discord.js@^14.17.3"
+    "discord.js": "npm:discord.js@^14.17.3",
+    "openai": "npm:openai@^4.80.0"
   }
 }

@@ -1,19 +1,23 @@
+import ollama from 'npm:ollama';
+import OpenAI from "npm:openai";
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { REST, Routes } from 'discord.js';
-import { Client, Collection, Events, GatewayIntentBits } from 'discord.js';
+import { Client, Collection, Events, GatewayIntentBits, Partials } from 'discord.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const token = Deno.env.get('DEEPSEEK_DISCORD_TOKEN');
+let messages = []
+
 if (!token) {
-    throw new Error('Token is not set in the environment variables.');
+    throw new Error('(Line 10: const token) Token is not set in the environment variables.');
 }
 
 const clientId = '1331682455345959055';
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.DirectMessages, GatewayIntentBits.DirectMessageTyping], partials: [Partials.Message, Partials.Channel, Partials.Reaction] });
 client.commands = new Collection();
 const commands = [];
 const foldersPath = join(__dirname, 'commands');
@@ -43,6 +47,31 @@ client.once(Events.ClientReady, readyClient => {
     readyClient.user.setPresence({ activities: [{ name: '/help' }], status: 'online' });
 });
 
+
+async function deepseekChat(userContent) {
+  
+  messages.push({ role: "user", content: userContent })
+
+  const response = await ollama.chat({
+    model: 'deepseek-r1:7b',
+    messages: [{ role: 'user', content: 'Why is the sky blue?' }],
+  });
+
+  messages.push({ role: "assistant", content: response.message.content })
+
+  return response.message.content
+}
+
+client.on(Events.MessageCreate, async (message) => {
+  if (message.author.bot) return;
+
+  try {
+    const response = await deepseekChat(message.content);
+    await message.reply(response.message.content);
+  } catch (error) {
+    console.error('Error in deepseekChat or message.reply:', error);
+  }
+});
 client.on(Events.InteractionCreate, async interaction => {
     if (!interaction.isCommand()) return;
 

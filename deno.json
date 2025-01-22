@@ -1,0 +1,8 @@
+{
+  "tasks": {
+    "dev": "deno run --watch index.js"
+  },
+  "imports": {
+    "discord.js": "npm:discord.js@^14.17.3"
+  }
+}

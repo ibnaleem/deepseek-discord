@@ -4,6 +4,7 @@
   },
   "imports": {
     "discord.js": "npm:discord.js@^14.17.3",
+    "ollama": "npm:ollama@^0.5.12",
     "openai": "npm:openai@^4.80.0"
   }
 }
